@@ -441,7 +441,6 @@ cdef class LBFGS(object):
                 x_array = np.PyArray_SimpleNewFromData(1, tshape, np.NPY_DOUBLE,
                                                        <void *>x_a).copy()
                 if x_result is not None:
-                    print "writing back stuff"                                       
                     x_result[:] = x_array.reshape(x0.shape)
                 
                 errors.raiseByCode(r)
