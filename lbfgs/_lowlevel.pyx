@@ -114,8 +114,8 @@ cdef lbfgsfloatval_t call_eval(void *cb_data_v,
     callback_data = <object>cb_data_v
     (f, progress_fn, shape, args) = callback_data
     tshape[0] = <np.npy_intp>n
-    x_array = np.PyArray_SimpleNewFromData(1, tshape, np.NPY_DOUBLE, <void *>x)
-    g_array = np.PyArray_SimpleNewFromData(1, tshape, np.NPY_DOUBLE, <void *>g)
+    x_array = np.PyArray_SimpleNewFromData(1, tshape, np.NPY_FLOAT, <void *>x)
+    g_array = np.PyArray_SimpleNewFromData(1, tshape, np.NPY_FLOAT, <void *>g)
 
     return f(x_array.reshape(shape), g_array.reshape(shape), *args)
 
@@ -134,9 +134,9 @@ cdef int call_progress(void *cb_data_v,
 
     if progress_fn:
         tshape[0] = <np.npy_intp>n
-        x_array = np.PyArray_SimpleNewFromData(1, tshape, np.NPY_DOUBLE,
+        x_array = np.PyArray_SimpleNewFromData(1, tshape, np.NPY_FLOAT,
                                                <void *>x)
-        g_array = np.PyArray_SimpleNewFromData(1, tshape, np.NPY_DOUBLE,
+        g_array = np.PyArray_SimpleNewFromData(1, tshape, np.NPY_FLOAT,
                                                <void *>g)
 
         r = progress_fn(x_array.reshape(shape), g_array.reshape(shape), fx,
@@ -429,7 +429,7 @@ cdef class LBFGS(object):
 
             if r == LBFGS_SUCCESS or r == LBFGS_ALREADY_MINIMIZED:
 
-                x_array = np.PyArray_SimpleNewFromData(1, tshape, np.NPY_DOUBLE,
+                x_array = np.PyArray_SimpleNewFromData(1, tshape, np.NPY_FLOAT,
                                                        <void *>x_a).copy()
                 if x_result is not None:
                     x_result[:] = x_array.reshape(x0.shape)
@@ -438,7 +438,7 @@ cdef class LBFGS(object):
             elif r in (LBFGSERR_ROUNDING_ERROR, LBFGSERR_MAXIMUMLINESEARCH,
                        LBFGSERR_MAXIMUMITERATION) :
                 
-                x_array = np.PyArray_SimpleNewFromData(1, tshape, np.NPY_DOUBLE,
+                x_array = np.PyArray_SimpleNewFromData(1, tshape, np.NPY_FLOAT,
                                                        <void *>x_a).copy()
                 if x_result is not None:
                     x_result[:] = x_array.reshape(x0.shape)

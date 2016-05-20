@@ -55,7 +55,7 @@ setup(
     install_requires=['numpy'],
     ext_modules=[NumpyExtension('lbfgs._lowlevel', 
                                 ['lbfgs/_lowlevel.c', 'liblbfgs/lbfgs.c'],
-                                include_dirs=include_dirs)],
+                                include_dirs=include_dirs, extra_compile_args=["-DLBFGS_FLOAT=32"])],
     classifiers=[
         "Intended Audience :: Developers",
         "Intended Audience :: Science/Research",
