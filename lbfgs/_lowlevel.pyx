@@ -428,7 +428,8 @@ cdef class LBFGS(object):
                       call_progress, <void *>callback_data, &self.params)
 
             if r == LBFGS_SUCCESS or r == LBFGS_ALREADY_MINIMIZED:
-
+                if r == LBFGS_ALREADY_MINIMIZED:
+                    print "already minimized"
                 x_array = np.PyArray_SimpleNewFromData(1, tshape, np.NPY_FLOAT,
                                                        <void *>x_a).copy()
                 if x_result is not None:
