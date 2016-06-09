@@ -239,7 +239,6 @@ _ERROR_MESSAGES = {
 
 class LBFGSErrors():
     def raiseByCode(self, code):
-        #print "Tried rising an error", _ERROR_MESSAGES[code][0], _ERROR_MESSAGES[code][1]
         if code in _ERROR_MESSAGES:
             raise getattr(self, _ERROR_MESSAGES[code][0])(_ERROR_MESSAGES[code][1])
         else:
