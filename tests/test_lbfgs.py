@@ -1,7 +1,7 @@
 from nose.tools import assert_equal, assert_greater, assert_raises
 from numpy.testing import assert_array_equal, assert_array_almost_equal
 
-from lbfgs import LBFGS, fmin_lbfgs
+from lbfgs import LBFGS, LBFGSError, fmin_lbfgs
 import numpy as np
 
 

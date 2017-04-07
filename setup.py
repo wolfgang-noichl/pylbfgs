@@ -46,12 +46,12 @@ class NumpyExtension(Extension):
 include_dirs = ['liblbfgs']
 
 setup(
-    name="PyLBFGS",
+    name="PyLBFGS32bit",
     version="0.2.0.3",
     description="LBFGS and OWL-QN optimization algorithms",
     author="Lars Buitinck, Forest Gregg",
     author_email="fgregg@gmail.com",
-    packages=['lbfgs'],
+    packages=['lbfgs32bit'],
     install_requires=['numpy'],
     ext_modules=[NumpyExtension('lbfgs._lowlevel', 
                                 ['lbfgs/_lowlevel.c', 'liblbfgs/lbfgs.c'],
