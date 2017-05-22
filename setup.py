@@ -51,7 +51,7 @@ setup(
     description="LBFGS and OWL-QN optimization algorithms",
     author="Lars Buitinck, Forest Gregg",
     author_email="fgregg@gmail.com",
-    packages=['lbfgs32bit'],
+    packages=['lbfgs'],
     install_requires=['numpy'],
     ext_modules=[NumpyExtension('lbfgs._lowlevel', 
                                 ['lbfgs/_lowlevel.c', 'liblbfgs/lbfgs.c'],
