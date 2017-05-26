@@ -38,9 +38,9 @@ class NumpyExtension(Extension):
 
     def del_include_dirs(self):
         pass
-        
-    include_dirs = property(get_include_dirs, 
-                            set_include_dirs, 
+
+    include_dirs = property(get_include_dirs,
+                            set_include_dirs,
                             del_include_dirs)
 
 include_dirs = ['liblbfgs']
@@ -51,9 +51,10 @@ setup(
     description="LBFGS and OWL-QN optimization algorithms",
     author="Lars Buitinck, Forest Gregg",
     author_email="fgregg@gmail.com",
-    packages=['lbfgs'],
+    packages=['lbfgs32bit'],
+    package_dir={'lbfgs32bit' : 'lbfgs'},
     install_requires=['numpy'],
-    ext_modules=[NumpyExtension('lbfgs._lowlevel', 
+    ext_modules=[NumpyExtension('lbfgs32bit._lowlevel',
                                 ['lbfgs/_lowlevel.c', 'liblbfgs/lbfgs.c'],
                                 include_dirs=include_dirs, extra_compile_args=["-DLBFGS_FLOAT=32"])],
     classifiers=[
