@@ -66,7 +66,7 @@ cdef extern from "lbfgs.h":
                                      lbfgsfloatval_t, lbfgsfloatval_t,
                                      lbfgsfloatval_t, lbfgsfloatval_t,
                                      int, int, int)
- 
+
     ctypedef struct lbfgs_parameter_t:
         int m
         lbfgsfloatval_t epsilon
@@ -170,6 +170,8 @@ _LINE_SEARCH_ALGO = {
 
 _ERROR_MESSAGES = {
     LBFGSERR_UNKNOWNERROR: ["UnknownError", "Unknown error."] ,
+    LBFGS_STOP: ["SuccessDelta", "Delta termination condition reached."],
+    LBFGS_SUCCESS: ["SuccessEpsilon", "Epsilon termination condition reached."],
     LBFGSERR_LOGICERROR: ["LogicError", "Logic error."],
     LBFGSERR_OUTOFMEMORY: ["OutOfMemory", "Insufficient memory."],
     LBFGSERR_CANCELED:
@@ -202,7 +204,7 @@ _ERROR_MESSAGES = {
         ["InvalidOrthantwise", "Invalid parameter orthantwise_c specified."],
     LBFGSERR_INVALID_ORTHANTWISE_START:
         ["InvalidOthantwiseStart",
-         "Invalid parameter orthantwise_start specified."], 
+         "Invalid parameter orthantwise_start specified."],
     LBFGSERR_INVALID_ORTHANTWISE_END:
         ["InvalidOrthantwiseEnd",
          "Invalid parameter orthantwise_end specified."],
@@ -227,14 +229,18 @@ _ERROR_MESSAGES = {
         ["MaximumIteration",
         "The algorithm routine reaches the maximum number of iterations."],
     LBFGSERR_WIDTHTOOSMALL:
-        ["WidthTooSmall",    
+        ["WidthTooSmall",
         "Relative width of the interval of uncertainty is at most xtol."],
     LBFGSERR_INVALIDPARAMETERS:
         ["InvalidParameters",
          "A logic error (negative line-search step) occurred."],
     LBFGSERR_INCREASEGRADIENT:
-        ["IncreaseGradient", 
+        ["IncreaseGradient",
          "The current search direction increases the objective function value."],
+    LBFGS_ALREADY_MINIMIZED:
+        ["AlreadyMinimized",
+         "The cost function seems to be minimal for the initial guess already."],
+
 }
 
 class LBFGSErrors():
@@ -243,7 +249,7 @@ class LBFGSErrors():
             raise getattr(self, _ERROR_MESSAGES[code][0])(_ERROR_MESSAGES[code][1])
         else:
             raise self.LBFGSError('Error Code: ' + str(code))
-    
+
 errors = LBFGSErrors()
 errors.LBFGSError = type('LBFGSError', (Exception,), {})
 for errno, errdetails in _ERROR_MESSAGES.iteritems():
@@ -368,7 +374,7 @@ cdef class LBFGS(object):
 
         def __set__(self, int val):
             self.params.orthantwise_end = val
-            
+
 
     def minimize(self, f, x0, progress=None, x_result=None, args=()):
         """Minimize a function using LBFGS or OWL-QN
@@ -420,29 +426,21 @@ cdef class LBFGS(object):
             raise errors.LBFGSError("Array of %d elements too large to handle" % n)
 
         x_a = aligned_copy(x0.ravel())
-        
+
         try:
             callback_data = (f, progress, x0.shape, args)
             r = lbfgs(n, x_a, fx_final, call_eval,
                       call_progress, <void *>callback_data, &self.params)
 
-            if r == LBFGS_SUCCESS or r == LBFGS_ALREADY_MINIMIZED:
-                if r == LBFGS_ALREADY_MINIMIZED:
-                    print "already minimized"
+            if r in (LBFGSERR_MAXIMUMITERATION, LBFGS_SUCCESS, LBFGS_STOP,
+                     LBFGS_ALREADY_MINIMIZED, LBFGSERR_ROUNDING_ERROR,
+                     LBFGSERR_MAXIMUMLINESEARCH) :
+
                 x_array = np.PyArray_SimpleNewFromData(1, tshape, np.NPY_FLOAT,
                                                        <void *>x_a).copy()
                 if x_result is not None:
                     x_result[:] = x_array.reshape(x0.shape)
 
-                return x_array.reshape(x0.shape)
-            elif r in (LBFGSERR_ROUNDING_ERROR, LBFGSERR_MAXIMUMLINESEARCH,
-                       LBFGSERR_MAXIMUMITERATION) :
-                
-                x_array = np.PyArray_SimpleNewFromData(1, tshape, np.NPY_FLOAT,
-                                                       <void *>x_a).copy()
-                if x_result is not None:
-                    x_result[:] = x_array.reshape(x0.shape)
-                
                 errors.raiseByCode(r)
                 return x_array.reshape(x0.shape)
             elif r == LBFGSERR_OUTOFMEMORY:
@@ -452,4 +450,3 @@ cdef class LBFGS(object):
 
         finally:
             lbfgs_free(x_a)
-
